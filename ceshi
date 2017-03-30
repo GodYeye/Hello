@@ -1,0 +1,184 @@
+
+$ git remote rm 仓库名
+
+categories linux | xiaodi | comments 评论关闭
+一 09 2017
+git push 每次都需要输入用户名和密码
+解决方案：
+
+每次都需要输入用户名和密码是因为你采用的是 https 方式提交代码， 如果采用的是 ssh 方式只需要在版本库中添加用户的 sha 的key就可以实现提交时无需输入用户名和密码。
+
+详细步骤：
+步骤1：
+
+如果你的版本库已经用https 方式创建好了，那么就需要先删除原来的提交方式。在终端执行以下指令：
+
+ git remote rm origin
+ git remote add origin git@github.com :( 用户名)/版本库名
+
+这里我提供一下我的具体例子：
+https: https://github.com/用户名/GitTest.git
+ssh: git@github.com:用户名/GitTest.git
+我是怎么知道的呢？如果你在创建版本库时选择不创建README.md，系统会提示你创建：
+
+https：
+…or create a new repository on the command line
+echo # GitTest >> README.md
+
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/Sugerming/GitTest.git
+git push -u origin master
+
+…or push an existing repository from the command line
+git remote add origin https://github.com/Sugerming/GitTest.git
+git push -u origin master
+
+
+
+ssh:
+…or create a new repository on the command line
+echo # GitTest >> README.md
+
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin git@github.com:Sugerming/GitTest.git
+git push -u origin master
+
+
+…or push an existing repository from the command line
+git remote add origin git@github.com:Sugerming/GitTest.git
+git push -u origin master
+
+步骤2：
+
+然后这个时候你使用下面指令提交代码：
+
+git push -u origin master
+
+系统会提示：
+
+The authenticity of host 'github.com (192.30.252.131)' can't be established.
+RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added 'github.com,192.30.252.131' (RSA) to the list of known h                             osts.
+Permission denied (publickey).
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+
+说明你权限不够。所以这时你需要在本地创建自己的RSA的key。如下：
+
+ssh-keygen -t rsa -C "用户名"
+
+然后系统会问你保存路径等东西，我直接enter跳过了。
+
+Generating public/private rsa key pair.
+Enter file in which to save the key (/c/Users/AlexYi/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+
+然后系统会生成一些东西：
+
+Your identification has been saved in /c/Users/AlexYi/.ssh/id_rsa.
+Your public key has been saved in /c/Users/AlexYi/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:rxfK05d7oZWpDvQ5dRQM0Na7...
+The key's randomart image is:
++---[RSA 2048]----+
+|           .o.+. |
+|             o o.|
+|            .   o|
+|               o |
+...
+
+最主要的是告诉你，你的可以在：
+
+Your public key has been saved in /c/Users/AlexYi/.ssh/id_rsa.pub
+
+找到这个文件，然后用记事本打开，就可以看到自己的key：
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADA...
+
+步骤3：
+
+然后将生成的rsa 的key添加到版本库中即可，方法：
+打开自己的版本库，点击右边的 Settings 进入配置页。
+然后点击左边导航栏的： Deploy keys 进入添加key页面
+然后点击： Add deploy keys ，将自己的内容输入进去就可以了。
+这样就完成了。
+
+最后继续提交更改的代码，使用：
+
+git push -u origin master
+
+可以提交成功。
+补充：
+
+如果要使用 git push简短提交代码：
+
+git push
+
+需要配置 :
+
+git config --global push.default simple
+
+或者：
+
+git config --global push.default matching
+
+区别在于，前者只提交你当前所在的分支，而后者会提交本地所有的分支。具体的自己去查一下就明白了
+
+categories linux | xiaodi | comments 评论关闭
+一 09 2017
+Github上 fork了别人的代码 本地更新主分支代码
+
+在GitHub上我们会去fork别人的一个项目，这就在自己的Github上生成了一个与原作者项目互不影响的副本，自己可以将自己Github上的这个项目再clone到本地进行修改，修改后再push，只有自己Github上的项目会发生改变，而原作者项目并不会受影响，避免了原作者项目被污染。但经过一段时间， 有可能作者原来的代码变化很大， 你想接着在他最新的代码上修改， 这时你需要合并原作者的最新代码过来， 让你的项目变成最新的。
+1、先克隆项目到本地：
+Git clone https://github.com/iakuf/mojo
+cd mojo
+2、添加原作者项目的 remote 地址， 然后将代码 fetch 过来
+git remote add sri https://github.com/kraih/mojo
+git fetch sri
+‘sri’相当于一个别名
+查看本地项目目录： git remote -v
+3、合并
+git checkout master
+git merge sri/master
+如果有冲突的话，需要丢掉本地分支：
+git reset –hard sri/master
+4、这时你的当前本地的项目变成和原作者的主项目一样了，可以把它提交到你的GitHub库
+git commit -am ‘更新到原作者的主分支’
+git push origin
+git push -u origin master -f –强制提交
+
+categories linux | xiaodi | comments 评论关闭
+« Older
+
+RSS  Entries RSS | Comments RSS
+
+    近期文章
+        释放Ubuntu/Linux系统cache，增加可用内存空间
+        使用putty连接一台Linux主机
+        开源项目托管GitHub的使用详述
+        认识nodejs 运行模式 【异步】【非阻塞】I/O
+        Git常用命令
+    文章归档
+        2017 年一月
+        2016 年十二月
+        2016 年十一月
+        2016 年十月
+        2016 年九月
+        2016 年七月
+        2013 年五月
+
+
+
+
+
+
+
+
+h
