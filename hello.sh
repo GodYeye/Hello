@@ -1,8 +1,10 @@
 #!/bin/sh
-git checkout shell1
+cd github/Hello
+
+git checkout first
 
 git add .
 
-git commit -m "shell + git first"
+git commit -m "shell + git Second"
 
-git push origin shell1 : Tset
+git push origin first:Tset
